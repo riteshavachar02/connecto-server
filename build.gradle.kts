@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ktor)
 }
 
+val koinVersion = "3.5.3"
 group = "com.example"
 version = "0.0.1"
 
@@ -31,4 +32,16 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+
+    //KMongo
+    implementation("org.litote.kmongo:kmongo:5.2.0")
+
+    // Koin Core for Dependency Injection
+    implementation("io.insert-koin:koin-core:${koinVersion}")
+
+    // Koin for Ktor integration
+    implementation("io.insert-koin:koin-ktor:${koinVersion}")
+
+    // SLF4J Logger (optional, but helpful for Koin logs)
+    implementation("io.insert-koin:koin-logger-slf4j:${koinVersion}")
 }
