@@ -11,4 +11,5 @@ interface UserRepository {
     suspend fun getUserByEmail(email: String): User?
 
     suspend fun dosePasswordForUserMatch(email: String, enteredPassword: String): Boolean
+
 }
