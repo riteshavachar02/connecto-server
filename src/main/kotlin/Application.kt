@@ -15,13 +15,13 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    configureSockets()
-    configureSerialization()
-    configureMonitoring()
-    configureSecurity()
-    configureHTTP()
-    configureRouting()
     install(Koin) {
         modules(mainModule)
     }
+    configureSecurity()
+    configureSockets()
+    configureSerialization()
+    configureMonitoring()
+    configureHTTP()
+    configureRouting()
 }

@@ -1,5 +1,4 @@
-val koinVersion = "3.5.3"
-val kmongoVersion = "5.2.0"
+val koinVersion: String by project
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -10,7 +9,7 @@ group = "com.example"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 repositories {
@@ -35,9 +34,9 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
 
     //KMongo
-    implementation("org.litote.kmongo:kmongo:${kmongoVersion}")
-    implementation("org.litote.kmongo:kmongo-coroutine:${kmongoVersion}")
-    implementation("org.litote.kmongo:kmongo-serialization:${kmongoVersion}")
+    implementation(libs.kmongo)
+    implementation(libs.kmongo.coroutine)
+
 
     // Koin Core for Dependency Injection
     implementation("io.insert-koin:koin-core:${koinVersion}")

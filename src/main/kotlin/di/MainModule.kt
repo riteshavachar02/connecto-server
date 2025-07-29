@@ -9,7 +9,9 @@ import org.litote.kmongo.reactivestreams.KMongo
 
 val mainModule = module {
     single {
-        val client = KMongo.createClient("mongodb+srv://connecto_user:qF0OENOhCBpXnJNN@cluster0.m0qcojn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").coroutine
+        val client = KMongo.createClient(
+            connectionString = "mongodb+srv://connecto_user:qF0OENOhCBpXnJNN@cluster0.m0qcojn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        ).coroutine
         client.getDatabase(Constants.DATABASE_NAME)
     }
 

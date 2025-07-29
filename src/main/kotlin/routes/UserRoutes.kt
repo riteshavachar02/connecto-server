@@ -12,35 +12,45 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 fun Route.userRoutes() {
-    val userController: UserController by inject()
-    route("api/user/create") {
-        post {
-            val request = call.receiveNullable<CreateUserAccount>() ?: kotlin.run{
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-            val userExist = userController.getUserByEmail(email = request.email) != null
-            if (userExist) {
-                call.respond(
-                    BasicApiResponse(
-                        successful = false,
-                        message = USER_ALREADY_EXISTS
-                    )
-                )
-                return@post
-            }
-            if (request.email.isBlank() || request.username.isBlank() || request.password.isBlank() ) {
-                call.respond(
-                    BasicApiResponse(
-                        successful = false,
-                        message = FIELDS_BLANK
-                    )
-                )
-                return@post
-            }
+    val userController: UserController by application.inject()
+
+    // GET route (just for checking)
+    get("/api/user/create") {
+        println("GET /api/user/create accessed")
+        call.respondText("GET route working", status = HttpStatusCode.OK)
+    }
+
+    // POST route
+    post("/api/user/create") {
+        val request = call.receiveNullable<CreateUserAccount>() ?: run {
             call.respond(
-                BasicApiResponse(successful = true)
+                HttpStatusCode.BadRequest,
+                BasicApiResponse(successful = false, message = "Invalid request body")
             )
+            return@post
         }
+
+        if (request.email.isBlank() || request.username.isBlank() || request.password.isBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                BasicApiResponse(successful = false, message = FIELDS_BLANK)
+            )
+            return@post
+        }
+
+        val userExists = userController.getUserByEmail(request.email) != null
+        if (userExists) {
+            call.respond(
+                HttpStatusCode.Conflict,
+                BasicApiResponse(successful = false, message = USER_ALREADY_EXISTS)
+            )
+            return@post
+        }
+
+        // Proceed to create user here if needed
+        call.respond(
+            HttpStatusCode.OK,
+            BasicApiResponse(successful = true, message = "User created successfully")
+        )
     }
 }
