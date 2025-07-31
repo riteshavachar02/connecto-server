@@ -5,10 +5,10 @@ import org.bson.types.ObjectId
 import java.util.Date
 
 data class Post(
-    @BsonId
-    val id: String = ObjectId().toString(),
     val userId: String,
     val imageUrl: String,
     val description: String,
-    val timestamp: Long
+    val timestamp: Long,
+    @BsonId
+    val id: String = ObjectId().toString()
 )
