@@ -1,7 +1,9 @@
 package com.example.di
 
+import com.example.data.repository.follow.FollowRepository
+import com.example.data.repository.follow.FollowRepositoryImpl
 import com.example.data.repository.user.UserRepository
-import com.example.data.repository.user.UserControllerImpl
+import com.example.data.repository.user.UserRepositoryImpl
 import com.example.util.Constants
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
@@ -16,6 +18,10 @@ val mainModule = module {
     }
 
     single<UserRepository> {
-        UserControllerImpl(get())
+        UserRepositoryImpl(get())
+    }
+
+    single<FollowRepository> {
+        FollowRepositoryImpl(get())
     }
 }
