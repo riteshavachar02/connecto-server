@@ -1,7 +1,9 @@
 package com.example.plugins
 
 import com.example.data.repository.follow.FollowRepository
+import com.example.data.repository.post.PostRepository
 import com.example.data.repository.user.UserRepository
+import com.example.routes.createPostRoute
 import com.example.routes.createUserRoute
 import com.example.routes.followUser
 import com.example.routes.loginUser
@@ -14,6 +16,7 @@ import kotlin.getValue
 fun Application.configureRouting() {
     val userRepository: UserRepository by inject()
     val followRepository: FollowRepository by inject()
+    val postRepository: PostRepository by inject()
 
     routing {
         // User Routes
@@ -23,5 +26,8 @@ fun Application.configureRouting() {
         //Follow Routes
         followUser(followRepository)
         unfollowUser(followRepository)
+
+        // Post Routes
+        createPostRoute(postRepository)
     }
 }

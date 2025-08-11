@@ -2,6 +2,8 @@ package com.example.di
 
 import com.example.data.repository.follow.FollowRepository
 import com.example.data.repository.follow.FollowRepositoryImpl
+import com.example.data.repository.post.PostRepository
+import com.example.data.repository.post.PostRepositoryImpl
 import com.example.data.repository.user.UserRepository
 import com.example.data.repository.user.UserRepositoryImpl
 import com.example.util.Constants
@@ -16,12 +18,13 @@ val mainModule = module {
         ).coroutine
         client.getDatabase(Constants.DATABASE_NAME)
     }
-
     single<UserRepository> {
         UserRepositoryImpl(get())
     }
-
     single<FollowRepository> {
         FollowRepositoryImpl(get())
+    }
+    single<PostRepository> {
+        PostRepositoryImpl(get())
     }
 }
