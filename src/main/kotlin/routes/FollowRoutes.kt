@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.data.repository.follow.FollowRepository
 import com.example.data.requests.FollowUpdateRequest
 import com.example.data.response.BasicApiResponse
+import com.example.service.FollowService
 import com.example.util.ApiResponseMessage.USER_NOT_FOUND
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receiveNullable
@@ -11,7 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
 
-fun Route.followUser(followRepository: FollowRepository) {
+fun Route.followUser(followService: FollowService) {
     post("/api/following/follow") {
         val request = call.receiveNullable<FollowUpdateRequest>() ?: kotlin.run {
             call.respond(
@@ -20,11 +21,8 @@ fun Route.followUser(followRepository: FollowRepository) {
             )
             return@post
         }
-        val didUserExist = followRepository.followUserIfExist(
-            followingUserId = request.followingUserId,
-            followedUserId = request.followedUserId
-        )
-        if (didUserExist) {
+
+        if (followService.followUserIfExist(request)) {
             call.respond(
                 status = HttpStatusCode.OK,
                 message = BasicApiResponse(
@@ -43,7 +41,7 @@ fun Route.followUser(followRepository: FollowRepository) {
     }
 }
 
-fun Route.unfollowUser(followRepository: FollowRepository) {
+fun Route.unfollowUser(followService: FollowService) {
     delete("/api/following/unfollow") {
         // Ensure the body is read as JSON
         val request = call.receiveNullable<FollowUpdateRequest>() ?: kotlin.run {
@@ -54,12 +52,7 @@ fun Route.unfollowUser(followRepository: FollowRepository) {
             return@delete
         }
 
-        val didUserExist = followRepository.unFollowUserIfExist(
-            followingUserId = request.followingUserId,
-            followedUserId = request.followedUserId
-        )
-
-        if (didUserExist) {
+        if (followService.unFollowUserIfExist(request)) {
             call.respond(
                 status = HttpStatusCode.OK,
                 message = BasicApiResponse(

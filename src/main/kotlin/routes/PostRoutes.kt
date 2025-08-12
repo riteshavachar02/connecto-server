@@ -1,18 +1,15 @@
 package com.example.routes
 
-import com.example.data.models.Post
-import com.example.data.repository.post.PostRepository
 import com.example.data.requests.CreatePostRequest
-import com.example.data.requests.FollowUpdateRequest
 import com.example.data.response.BasicApiResponse
+import com.example.service.PostService
 import com.example.util.ApiResponseMessage
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receiveNullable
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.post
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
-fun Route.createPostRoute(postRepository: PostRepository) {
+fun Route.createPostRoute(postService: PostService) {
     post("/api/post/create") {
         val request = call.receiveNullable<CreatePostRequest>() ?: kotlin.run {
             call.respond(
@@ -22,15 +19,7 @@ fun Route.createPostRoute(postRepository: PostRepository) {
             return@post
         }
 
-        val didUserExist = postRepository.createPostIfUserExists(
-            Post(
-                imageUrl = "",
-                userId = request.userId,
-                description = request.description,
-                timestamp = System.currentTimeMillis()
-            )
-        )
-
+        val didUserExist = postService.createPostIfUserExist(request)
         if (!didUserExist) {
             call.respond(
                 status = HttpStatusCode.OK,
