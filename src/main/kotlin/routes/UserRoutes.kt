@@ -1,9 +1,10 @@
 package com.example.routes
 
-import com.example.data.repository.user.UserRepository
-import com.example.data.models.User
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.example.data.requests.CreateAccountRequest
 import com.example.data.requests.LoginRequest
+import com.example.data.response.AuthResponse
 import com.example.data.response.BasicApiResponse
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
@@ -14,6 +15,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.Date
 
 fun Route.createUserRoute(userService: UserService) {
 
@@ -53,10 +55,13 @@ fun Route.createUserRoute(userService: UserService) {
     }
 }
 
-fun Route.loginUser(userRepository: UserRepository){
-
+fun Route.loginUser(
+    userService: UserService,
+    jwtIssuer: String,
+    jwtAudience: String,
+    jwtSecret: String
+){
     post("/api/user/login") {
-
         val request = call.receiveNullable<LoginRequest>() ?: run {
             call.respond(
                 status = HttpStatusCode.BadRequest,
@@ -72,16 +77,20 @@ fun Route.loginUser(userRepository: UserRepository){
             )
         }
 
-        val isCorrectPassword = userRepository.dosePasswordForUserMatch(
-            email = request.email,
-            enteredPassword = request.password
-        )
+        val isCorrectPassword = userService.dosePasswordMatchForUser(request)
+
         if (isCorrectPassword) {
+            val expiresIn = 1000L * 60L * 60L * 24L * 365L
+            val token = JWT.create()
+                .withClaim("email", request.email)
+                .withIssuer(jwtIssuer)
+                .withExpiresAt(Date(System.currentTimeMillis() + expiresIn))
+                .withAudience(jwtAudience)
+                .sign(Algorithm.HMAC256(jwtSecret))
             call.respond(
                 status = HttpStatusCode.OK,
-                message = BasicApiResponse(
-                    successful = true,
-                    message = SUCCESSFUL_LOGIN
+                message = AuthResponse(
+                    token = token
                 )
             )
         } else {

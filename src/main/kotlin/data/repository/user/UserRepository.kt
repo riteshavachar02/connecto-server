@@ -12,4 +12,6 @@ interface UserRepository {
 
     suspend fun dosePasswordForUserMatch(email: String, enteredPassword: String): Boolean
 
+    suspend fun doseEmailBelongToUserId(email: String, userId: String): Boolean
+
 }
