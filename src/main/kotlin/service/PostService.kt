@@ -3,6 +3,7 @@ package com.example.service
 import com.example.data.models.Post
 import com.example.data.repository.post.PostRepository
 import com.example.data.requests.CreatePostRequest
+import com.example.util.Constants
 
 class PostService(
     private val repository: PostRepository
@@ -16,5 +17,13 @@ class PostService(
                 timestamp = System.currentTimeMillis()
             )
         )
+    }
+
+    suspend fun getPostsForFollows(
+        userId: String,
+        page: Int = 0,
+        pageSize: Int = Constants.DEFAULT_POST_PAGE_SIZE
+    ) : List<Post> {
+        return repository.getPostsByFollows(userId, page, pageSize)
     }
 }

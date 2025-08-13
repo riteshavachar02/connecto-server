@@ -5,10 +5,11 @@ import com.example.data.response.BasicApiResponse
 import com.example.service.PostService
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
+import com.example.util.Constants
+import com.example.util.QueryParams
 import io.ktor.http.*
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -57,6 +58,40 @@ fun Route.createPostRoute(
                     )
                 )
             }
+        }
+    }
+}
+
+fun Route.getPostForFollows(
+    postService: PostService,
+    userService: UserService
+) {
+    authenticate {
+        get("api/post/get") {
+            val userId = call.parameters[QueryParams.PARAM_USER_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            val page = call.parameters[QueryParams.PARAM_PAGE]?.toIntOrNull() ?: 0
+            val pageSize = call.parameters[QueryParams.PARAM_PAGE_SIZE]?.toIntOrNull() ?: Constants.DEFAULT_POST_PAGE_SIZE
+
+            val email = call.principal<JWTPrincipal>()?.getClaim("email", String:: class)
+            val isEmailByUser = userService.doseEmailBelongToUserId(
+                email = email ?: "",
+                userId = userId
+            )
+            if (!isEmailByUser) {
+                call.respond(
+                    status = HttpStatusCode.Unauthorized,
+                    message = "You are not who you say you are."
+                )
+                return@get
+            }
+            val posts = postService.getPostsForFollows(userId, page, pageSize)
+            call.respond(
+                HttpStatusCode.OK,
+                posts
+            )
         }
     }
 }
