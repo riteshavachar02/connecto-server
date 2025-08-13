@@ -5,10 +5,15 @@ import com.example.data.repository.post.PostRepository
 import com.example.data.repository.user.UserRepository
 import com.example.routes.createPostRoute
 import com.example.routes.createUserRoute
+import com.example.routes.deletePost
 import com.example.routes.followUser
+import com.example.routes.getPostForFollows
+import com.example.routes.likeParent
 import com.example.routes.loginUser
 import com.example.routes.unfollowUser
+import com.example.routes.unlikeParent
 import com.example.service.FollowService
+import com.example.service.LikeService
 import com.example.service.PostService
 import com.example.service.UserService
 import io.ktor.server.application.*
@@ -21,6 +26,7 @@ fun Application.configureRouting() {
     val userService: UserService by inject()
     val followService: FollowService by inject()
     val postService: PostService by inject()
+    val likeService: LikeService by inject()
 
     val jwtIssuer = environment.config.property("jwt.domain").getString()
     val jwtAudience = environment.config.property("jwt.audience").getString()
@@ -43,5 +49,11 @@ fun Application.configureRouting() {
 
         // Post Routes
         createPostRoute(postService, userService)
+        getPostForFollows(postService, userService)
+        deletePost(postService)
+
+        //Like
+        likeParent(likeService)
+        unlikeParent(likeService)
     }
 }

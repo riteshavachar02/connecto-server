@@ -1,0 +1,8 @@
+package com.example.data.repository.like
+
+interface LikeRepository {
+
+    suspend fun likeParent(userId: String, parentId: String): Boolean
+
+    suspend fun unLikeParent(userId: String, parentId: String): Boolean
+}
