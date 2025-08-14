@@ -27,11 +27,7 @@ fun Route.likeParent(
                 return@post
             }
 
-            val like = likeService.likeParent(
-                request = LikeUpdateRequest(
-                    userId = request.userId, parentId = request.parentId
-                )
-            )
+            val like = likeService.likeParent(request)
             if (like) {
                 call.respond(
                     status = HttpStatusCode.OK,

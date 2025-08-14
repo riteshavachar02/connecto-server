@@ -18,4 +18,8 @@ class LikeService(
             parentId = request.parentId
         )
     }
+
+    suspend fun deleteLikesForParent(parentId: String) {
+        repository.deleteLikesForParent(parentId)
+    }
 }

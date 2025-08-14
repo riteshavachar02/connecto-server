@@ -9,7 +9,6 @@ import com.example.data.response.BasicApiResponse
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
 import com.example.util.ApiResponseMessage.FIELDS_BLANK
-import com.example.util.ApiResponseMessage.SUCCESSFUL_LOGIN
 import com.example.util.ApiResponseMessage.USER_ALREADY_EXISTS
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -17,7 +16,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.Date
 
-fun Route.createUserRoute(userService: UserService) {
+fun Route.createUser(userService: UserService) {
 
     post("/api/user/create") {
 

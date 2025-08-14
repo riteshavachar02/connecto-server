@@ -1,11 +1,16 @@
 package com.example.di
 
+import com.example.data.repository.comment.CommentRepository
+import com.example.data.repository.comment.CommentRepositoryImpl
 import com.example.data.repository.follow.FollowRepository
 import com.example.data.repository.follow.FollowRepositoryImpl
+import com.example.data.repository.like.LikeRepository
+import com.example.data.repository.like.LikeRepositoryImpl
 import com.example.data.repository.post.PostRepository
 import com.example.data.repository.post.PostRepositoryImpl
 import com.example.data.repository.user.UserRepository
 import com.example.data.repository.user.UserRepositoryImpl
+import com.example.service.CommentService
 import com.example.service.FollowService
 import com.example.service.LikeService
 import com.example.service.PostService
@@ -31,12 +36,16 @@ val mainModule = module {
     single<PostRepository> {
         PostRepositoryImpl(get())
     }
-    single<PostRepository> {
-        PostRepositoryImpl(get())
+    single<LikeRepository> {
+        LikeRepositoryImpl(get())
+    }
+    single<CommentRepository> {
+        CommentRepositoryImpl(get())
     }
 
     single { UserService(get()) }
     single { FollowService(get()) }
     single { PostService(get()) }
     single { LikeService(get()) }
+    single { CommentService(get()) }
 }

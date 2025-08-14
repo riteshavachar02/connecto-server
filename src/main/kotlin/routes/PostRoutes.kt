@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.data.requests.CreatePostRequest
 import com.example.data.requests.DeletePostRequest
 import com.example.data.response.BasicApiResponse
+import com.example.service.LikeService
 import com.example.service.PostService
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
@@ -15,7 +16,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.createPostRoute(
+fun Route.createPost(
     postService: PostService,
     userService: UserService
 ) {
@@ -99,6 +100,7 @@ fun Route.getPostForFollows(
 
 fun Route.deletePost(
     postService: PostService,
+    likeService: LikeService
 ) {
     authenticate {
         delete("api/post/delete") {
@@ -115,6 +117,7 @@ fun Route.deletePost(
                 return@delete
             }
             postService.deletePost(request.postId)
+            likeService.deleteLikesForParent(request.postId)
             call.respond(
                 status = HttpStatusCode.OK,
                 message = BasicApiResponse(
