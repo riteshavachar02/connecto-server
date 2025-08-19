@@ -27,7 +27,7 @@ fun Route.likeParent(
                 return@post
             }
 
-            val like = likeService.likeParent(request)
+            val like = likeService.likeParent(request, call.userId)
             if (like) {
                 call.respond(
                     status = HttpStatusCode.OK,
@@ -59,12 +59,7 @@ fun Route.unlikeParent(
                 return@delete
             }
 
-            val unlike = likeService.unlikeParent(
-                request = LikeUpdateRequest(
-                    userId = request.userId,
-                    parentId = request.parentId
-                )
-            )
+            val unlike = likeService.unlikeParent(request, call.userId)
             if (unlike) {
                 call.respond(
                     status = HttpStatusCode.OK,

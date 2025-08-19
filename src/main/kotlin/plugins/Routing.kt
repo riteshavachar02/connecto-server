@@ -50,8 +50,8 @@ fun Application.configureRouting() {
         unfollowUser(followService)
 
         // Post Routes
-        createPost(postService, userService)
-        getPostForFollows(postService, userService)
+        createPost(postService)
+        getPostForFollows(postService)
         deletePost(postService, likeService)
 
         //Like Routes

@@ -8,11 +8,11 @@ import com.example.util.Constants
 class PostService(
     private val repository: PostRepository
 ) {
-    suspend fun createPostIfUserExist(request: CreatePostRequest): Boolean {
+    suspend fun createPostIfUserExist(request: CreatePostRequest, userId: String): Boolean {
         return repository.createPostIfUserExists(
             Post(
                 imageUrl = "",
-                userId = request.userId,
+                userId = userId,
                 description = request.description,
                 timestamp = System.currentTimeMillis()
             )

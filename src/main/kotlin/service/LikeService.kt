@@ -6,15 +6,15 @@ import com.example.data.requests.LikeUpdateRequest
 class LikeService(
     private val repository: LikeRepository
 ) {
-    suspend fun likeParent(request: LikeUpdateRequest): Boolean {
+    suspend fun likeParent(request: LikeUpdateRequest, userId: String): Boolean {
         return repository.likeParent(
-            userId = request.userId,
+            userId = userId,
             parentId = request.parentId
         )
     }
-    suspend fun unlikeParent(request: LikeUpdateRequest): Boolean {
+    suspend fun unlikeParent(request: LikeUpdateRequest, userId: String): Boolean {
         return repository.unLikeParent(
-            userId = request.userId,
+            userId = userId,
             parentId = request.parentId
         )
     }

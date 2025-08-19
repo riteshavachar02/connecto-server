@@ -7,15 +7,11 @@ import com.example.service.CommentService
 import com.example.service.LikeService
 import com.example.util.ApiResponseMessage
 import com.example.util.QueryParams
-import io.ktor.client.request.request
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.authenticate
-import io.ktor.server.request.receiveNullable
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
+import io.ktor.http.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Route.createComment(
     commentService: CommentService
@@ -33,7 +29,7 @@ fun Route.createComment(
                 return@post
             }
 
-            when(commentService.createComment(request)) {
+            when(commentService.createComment(request, call.userId)) {
                 is CommentService.ValidationEvent.ErrorCommentTooLong -> {
                     call.respond(
                         status = HttpStatusCode.OK,
@@ -105,6 +101,11 @@ fun Route.deleteComment(
                         message = "Invalid Request"
                     )
                 )
+                return@delete
+            }
+            val comment = commentService.getCommentById(request.commentId)
+            if (comment?.userId != call.userId) {
+                call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }
 
