@@ -4,6 +4,9 @@ import com.example.data.models.User
 import com.example.data.repository.user.UserRepository
 
 class FakeUserRepository: UserRepository {
+    override suspend fun deleteUserById(userId: String): Boolean {
+        TODO("Not yet implemented")
+    }
 
     val users = mutableListOf<User>()
 
