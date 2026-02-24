@@ -14,4 +14,6 @@ interface UserRepository {
 
     suspend fun doseEmailBelongToUserId(email: String, userId: String): Boolean
 
+    suspend fun deleteUserById(userId: String): Boolean
+
 }

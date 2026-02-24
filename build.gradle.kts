@@ -30,16 +30,21 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.kotlin.test.junit)
 
     //KMongo
     implementation(libs.kmongo)
     implementation(libs.kmongo.coroutine)
 
-
     // Koin Core for Dependency Injection
     implementation("io.insert-koin:koin-core:${koinVersion}")
     implementation("io.insert-koin:koin-ktor:${koinVersion}")
     implementation("io.insert-koin:koin-logger-slf4j:${koinVersion}")
+
+    // Test dependencies
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.ktor.server.tests)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.truth)
 }

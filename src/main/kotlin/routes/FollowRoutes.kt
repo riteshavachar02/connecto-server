@@ -21,7 +21,7 @@ fun Route.followUser(followService: FollowService) {
                 return@post
             }
 
-            if (followService.followUserIfExist(request, call.userId)) {
+            if (followService.followUserIfExist(request = request, followingUserId = call.userId)) {
                 call.respond(
                     status = HttpStatusCode.OK,
                     message = BasicApiResponse(

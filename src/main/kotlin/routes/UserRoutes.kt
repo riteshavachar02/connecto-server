@@ -2,6 +2,7 @@ package com.example.routes
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.data.models.Post
 import com.example.data.requests.CreateAccountRequest
 import com.example.data.requests.LoginRequest
 import com.example.data.response.AuthResponse
@@ -11,6 +12,9 @@ import com.example.util.ApiResponseMessage
 import com.example.util.ApiResponseMessage.FIELDS_BLANK
 import com.example.util.ApiResponseMessage.USER_ALREADY_EXISTS
 import io.ktor.http.*
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -22,12 +26,12 @@ fun Route.createUser(userService: UserService) {
 
         val request = call.receiveNullable<CreateAccountRequest>() ?: run {
             call.respond(
-                HttpStatusCode.BadRequest,
-                BasicApiResponse(successful = false, message = "Invalid request body")
+                status = HttpStatusCode.BadRequest,
+                message = ApiResponseMessage.INVALID_REQUEST
             )
             return@post
         }
-        if (userService.doseUSerWithEmailExist(request.email)) {
+        if (userService.doseUserWithEmailExist(request.email)) {
             call.respond(
                 HttpStatusCode.Conflict,
                 BasicApiResponse(successful = false, message = USER_ALREADY_EXISTS)
@@ -64,7 +68,7 @@ fun Route.loginUser(
         val request = call.receiveNullable<LoginRequest>() ?: run {
             call.respond(
                 status = HttpStatusCode.BadRequest,
-                message = "Invalid request body"
+                message = ApiResponseMessage.INVALID_REQUEST
             )
             return@post
         }
@@ -74,12 +78,13 @@ fun Route.loginUser(
                 status = HttpStatusCode.BadRequest,
                 message = FIELDS_BLANK
             )
+            return@post
         }
 
 
         val user = userService.getUserByEmail(request.email) ?: kotlin.run {
             call.respond(
-                status = HttpStatusCode.OK,
+                status = HttpStatusCode.Unauthorized,
                 message = BasicApiResponse(
                     successful = false,
                     message = ApiResponseMessage.INVALID_CREDENTIALS
@@ -114,6 +119,40 @@ fun Route.loginUser(
                     message = ApiResponseMessage.INVALID_CREDENTIALS
                 )
             )
+        }
+    }
+}
+
+fun Route.deleteUser(userService: UserService){
+
+    authenticate {
+        delete("/api/user/delete") {
+
+            val principal = call.principal<JWTPrincipal>()
+            val userId = principal?.getClaim("userId", String::class)
+
+            if (userId == null ){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponseMessage.USER_NOT_FOUND
+                )
+                return@delete
+            }
+
+            val isDeleted = userService.deleteUser(userId)
+
+            if (isDeleted){
+
+                call.respond(
+                    status = HttpStatusCode.OK,
+                    message = ApiResponseMessage.USER_DELETED
+                )
+            } else {
+                call.respond(
+                    status = HttpStatusCode.NotFound,
+                    message = ApiResponseMessage.USER_NOT_FOUND
+                )
+            }
         }
     }
 }

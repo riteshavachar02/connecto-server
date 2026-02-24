@@ -5,6 +5,7 @@ import com.example.routes.createPost
 import com.example.routes.createUser
 import com.example.routes.deleteComment
 import com.example.routes.deletePost
+import com.example.routes.deleteUser
 import com.example.routes.followUser
 import com.example.routes.getCommentsForPost
 import com.example.routes.getPostForFollows
@@ -44,6 +45,7 @@ fun Application.configureRouting() {
             jwtAudience = jwtAudience,
             jwtSecret = jwtSecret
         )
+        deleteUser(userService)
 
         //Follow Routes
         followUser(followService)
@@ -52,7 +54,7 @@ fun Application.configureRouting() {
         // Post Routes
         createPost(postService)
         getPostForFollows(postService)
-        deletePost(postService, likeService)
+        deletePost(postService, likeService, commentService)
 
         //Like Routes
         likeParent(likeService)

@@ -33,4 +33,9 @@ class UserRepositoryImpl(
     override suspend fun doseEmailBelongToUserId(email: String, userId: String): Boolean {
         return users.findOneById(userId)?.email == email
     }
+
+    override suspend fun deleteUserById(userId: String): Boolean {
+        val deleteCount =  users.deleteOneById(userId).deletedCount
+        return deleteCount > 0
+    }
 }

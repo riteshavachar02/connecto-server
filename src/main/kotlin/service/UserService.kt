@@ -9,7 +9,7 @@ class UserService(
     private val repository: UserRepository,
 ) {
 
-    suspend fun doseUSerWithEmailExist(email: String): Boolean {
+    suspend fun doseUserWithEmailExist(email: String): Boolean {
         return repository.getUserByEmail(email) != null
     }
 
@@ -45,6 +45,10 @@ class UserService(
                 linkedInUrl = null
             )
         )
+    }
+
+    suspend fun deleteUser(userId: String): Boolean {
+        return repository.deleteUserById(userId)
     }
 
     fun validateCreateAccountRequest(request: CreateAccountRequest): ValidationEvent{
