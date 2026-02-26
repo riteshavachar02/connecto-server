@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.data.requests.CreateCommentRequest
 import com.example.data.requests.DeleteCommentRequest
 import com.example.data.response.BasicApiResponse
+import com.example.service.ActivityService
 import com.example.service.CommentService
 import com.example.service.LikeService
 import com.example.util.ApiResponseMessage
@@ -14,7 +15,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.createComment(
-    commentService: CommentService
+    commentService: CommentService,
+    activityService: ActivityService
 ) {
     authenticate {
         post("/api/comment/create") {
@@ -30,6 +32,7 @@ fun Route.createComment(
             }
 
             when(commentService.createComment(request, call.userId)) {
+
                 is CommentService.ValidationEvent.ErrorCommentTooLong -> {
                     call.respond(
                         status = HttpStatusCode.OK,
@@ -39,6 +42,7 @@ fun Route.createComment(
                         )
                     )
                 }
+
                 is CommentService.ValidationEvent.ErrorFieldsEmpty -> {
                     call.respond(
                         status = HttpStatusCode.OK,
@@ -48,7 +52,22 @@ fun Route.createComment(
                         )
                     )
                 }
+
+                is CommentService.ValidationEvent.PostNotFound -> {
+                    call.respond(
+                        status = HttpStatusCode.NotFound,
+                        message = BasicApiResponse(
+                            successful = false,
+                            message = ApiResponseMessage.POST_NOT_FOUND
+                        )
+                    )
+                }
+
                 is CommentService.ValidationEvent.Success -> {
+                    activityService.addCommentActivity(
+                        byUserId = call.userId,
+                        postId = request.postId
+                    )
                     call.respond(
                         status = HttpStatusCode.OK,
                         message = BasicApiResponse(
@@ -89,7 +108,8 @@ fun Route.getCommentsForPost(
 
 fun Route.deleteComment(
     commentService: CommentService,
-    likeService: LikeService
+    likeService: LikeService,
+    activityService: ActivityService
 ) {
     authenticate {
         delete("/api/comment/delete") {
@@ -103,6 +123,7 @@ fun Route.deleteComment(
                 )
                 return@delete
             }
+
             val comment = commentService.getCommentById(request.commentId)
             if (comment?.userId != call.userId) {
                 call.respond(HttpStatusCode.Unauthorized)
@@ -112,6 +133,11 @@ fun Route.deleteComment(
             val delete = commentService.deleteComment(request.commentId)
             if (delete) {
                 likeService.deleteLikesForParent(request.commentId)
+                activityService.deleteCommentActivity(
+                    byUserId = call.userId,
+                    postId = comment.postId
+                )
+
                 call.respond(
                     status = HttpStatusCode.OK,
                     message = BasicApiResponse(

@@ -2,11 +2,13 @@ package com.example.service
 
 import com.example.data.models.Comment
 import com.example.data.repository.comment.CommentRepository
+import com.example.data.repository.post.PostRepository
 import com.example.data.requests.CreateCommentRequest
 import com.example.util.Constants
 
 class CommentService(
-    private val repository: CommentRepository
+    private val repository: CommentRepository,
+    private val postRepository: PostRepository
 ) {
     suspend fun createComment(createCommentRequest: CreateCommentRequest, userId: String): ValidationEvent {
         createCommentRequest.apply {
@@ -17,6 +19,7 @@ class CommentService(
                 return ValidationEvent.ErrorCommentTooLong
             }
         }
+        val postExist = postRepository.getPost(createCommentRequest.postId) ?: return ValidationEvent.PostNotFound
 
         repository.createComment(
             Comment(
@@ -48,6 +51,7 @@ class CommentService(
     sealed class ValidationEvent {
         object ErrorFieldsEmpty: ValidationEvent()
         object ErrorCommentTooLong: ValidationEvent()
+        object PostNotFound: ValidationEvent()
         object Success: ValidationEvent()
     }
 }

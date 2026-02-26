@@ -7,12 +7,14 @@ import com.example.routes.deleteComment
 import com.example.routes.deletePost
 import com.example.routes.deleteUser
 import com.example.routes.followUser
+import com.example.routes.getActivities
 import com.example.routes.getCommentsForPost
 import com.example.routes.getPostForFollows
 import com.example.routes.likeParent
 import com.example.routes.loginUser
 import com.example.routes.unfollowUser
 import com.example.routes.unlikeParent
+import com.example.service.ActivityService
 import com.example.service.CommentService
 import com.example.service.FollowService
 import com.example.service.LikeService
@@ -30,6 +32,7 @@ fun Application.configureRouting() {
     val postService: PostService by inject()
     val likeService: LikeService by inject()
     val commentService: CommentService by inject()
+    val activityService: ActivityService by inject()
 
     val jwtIssuer = environment.config.property("jwt.domain").getString()
     val jwtAudience = environment.config.property("jwt.audience").getString()
@@ -48,8 +51,8 @@ fun Application.configureRouting() {
         deleteUser(userService)
 
         //Follow Routes
-        followUser(followService)
-        unfollowUser(followService)
+        followUser(followService, activityService)
+        unfollowUser(followService, activityService)
 
         // Post Routes
         createPost(postService)
@@ -57,12 +60,15 @@ fun Application.configureRouting() {
         deletePost(postService, likeService, commentService)
 
         //Like Routes
-        likeParent(likeService)
-        unlikeParent(likeService)
+        likeParent(likeService, activityService)
+        unlikeParent(likeService, activityService)
 
         // Comment Routes
-        createComment(commentService)
-        deleteComment(commentService, likeService)
+        createComment(commentService, activityService)
+        deleteComment(commentService, likeService, activityService)
         getCommentsForPost(commentService)
+
+        //Activity Route
+        getActivities(activityService)
     }
 }
