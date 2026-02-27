@@ -12,6 +12,7 @@ import com.example.routes.getCommentsForPost
 import com.example.routes.getPostForFollows
 import com.example.routes.likeParent
 import com.example.routes.loginUser
+import com.example.routes.searchUsers
 import com.example.routes.unfollowUser
 import com.example.routes.unlikeParent
 import com.example.service.ActivityService
@@ -49,6 +50,7 @@ fun Application.configureRouting() {
             jwtSecret = jwtSecret
         )
         deleteUser(userService)
+        searchUsers(userService)
 
         //Follow Routes
         followUser(followService, activityService)

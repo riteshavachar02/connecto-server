@@ -28,6 +28,20 @@ class FollowRepositoryImpl(
         return true
     }
 
+    override suspend fun isFollowing(
+        followingUserId: String,
+        followedUserId: String
+    ): Boolean {
+
+        val result = following.findOne(
+            and(
+                Following::followingUserId eq followingUserId,
+                Following::followedUserId eq followedUserId
+            )
+        )
+        return result != null
+    }
+
     override suspend fun unFollowUserIfExist(
         followingUserId: String,
         followedUserId: String

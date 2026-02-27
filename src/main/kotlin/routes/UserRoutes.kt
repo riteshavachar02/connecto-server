@@ -11,6 +11,7 @@ import com.example.service.UserService
 import com.example.util.ApiResponseMessage
 import com.example.util.ApiResponseMessage.FIELDS_BLANK
 import com.example.util.ApiResponseMessage.USER_ALREADY_EXISTS
+import com.example.util.QueryParams
 import io.ktor.http.*
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -153,6 +154,40 @@ fun Route.deleteUser(userService: UserService){
                     message = ApiResponseMessage.USER_NOT_FOUND
                 )
             }
+        }
+    }
+}
+
+fun Route.searchUsers(userService: UserService) {
+    authenticate {
+        get("/api/user/search") {
+            val query = call.request.queryParameters[QueryParams.PARAM_QUERY]
+            val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+            val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 15
+
+            if (query.isNullOrBlank()){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponseMessage.QUERY_REQUIRED
+                )
+                return@get
+            }
+
+            val currentUserId = call.userId
+
+            val users = userService.searchUsers(
+                query = query,
+                page = page,
+                pageSize = pageSize,
+                currentUserId = currentUserId
+            )
+
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = users
+            )
+
+
         }
     }
 }

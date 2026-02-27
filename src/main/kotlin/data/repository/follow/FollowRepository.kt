@@ -11,4 +11,9 @@ interface FollowRepository {
         followingUserId: String,
         followedUserId: String
     ): Boolean
+
+    suspend fun isFollowing(
+        followingUserId: String,
+        followedUserId: String
+    ): Boolean
 }

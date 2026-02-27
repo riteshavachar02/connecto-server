@@ -1,6 +1,7 @@
 package com.example.data.repository.user
 
 import com.example.data.models.User
+import com.example.util.Constants
 
 interface UserRepository {
 
@@ -15,5 +16,11 @@ interface UserRepository {
     suspend fun doseEmailBelongToUserId(email: String, userId: String): Boolean
 
     suspend fun deleteUserById(userId: String): Boolean
+
+    suspend fun searchUsers(
+        query: String,
+        page: Int = 0,
+        pageSize: Int = Constants.DEFAULT_USER_PAGE_SIZE,
+    ): List<User>
 
 }

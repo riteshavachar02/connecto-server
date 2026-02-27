@@ -3,6 +3,7 @@ package com.example.data.repository.user
 import com.example.data.models.User
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.regex
 
 class UserRepositoryImpl(
     db: CoroutineDatabase
@@ -37,5 +38,18 @@ class UserRepositoryImpl(
     override suspend fun deleteUserById(userId: String): Boolean {
         val deleteCount =  users.deleteOneById(userId).deletedCount
         return deleteCount > 0
+    }
+
+    override suspend fun searchUsers(
+        query: String,
+        page: Int,
+        pageSize: Int
+    ): List<User> {
+        return users.find(
+            User::username regex "(?i)$query"
+        )
+            .skip(page * pageSize)
+            .limit(pageSize)
+            .toList()
     }
 }
