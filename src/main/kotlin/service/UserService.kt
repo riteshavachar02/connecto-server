@@ -4,7 +4,8 @@ import com.example.data.models.User
 import com.example.data.repository.follow.FollowRepository
 import com.example.data.repository.user.UserRepository
 import com.example.data.requests.CreateAccountRequest
-import com.example.data.requests.LoginRequest
+import com.example.data.requests.UpdateProfileRequest
+import com.example.data.response.ProfileResponse
 import com.example.data.response.UserSearchResponse
 
 class UserService(
@@ -16,29 +17,47 @@ class UserService(
         return userRepository.getUserByEmail(email) != null
     }
 
-    suspend fun dosePasswordMatchForUser(request: LoginRequest): Boolean {
-        return userRepository.dosePasswordForUserMatch(
-            email = request.email,
-            enteredPassword = request.password
+    suspend fun getUserProfile(userId: String, callerUserId: String): ProfileResponse? {
+        val user = userRepository.getUserById(userId) ?: return null
+        return ProfileResponse(
+            username = user.username,
+            bio = user.bio,
+            followerCount = user.followerCount,
+            followingCount = user.followingCount,
+            postCount = user.postCount,
+            profilePictureUrl = user.profileImageUrl,
+            topSkillsUrl = user.skills,
+            gitHubUrl = user.gitHubUrl,
+            instagramUrl = user.instagramUrl,
+            linkedinUrl = user.linkedInUrl,
+            isOwnedProfile = userId == callerUserId,
+            isfollowing = if (userId != callerUserId) {
+                followRepository.isFollowing(callerUserId, userId)
+            } else {
+                false
+            }
         )
+
     }
 
-    suspend fun searchUsers(query: String, currentUserId: String, page: Int, pageSize: Int): List<UserSearchResponse> {
+    suspend fun searchUsers(
+        query: String,
+        currentUserId: String,
+        page: Int,
+        pageSize: Int
+    ): List<UserSearchResponse> {
         val users = userRepository.searchUsers(query, page, pageSize)
-        return users
-            .filter { it.id != currentUserId}
-            .map { user ->
-            val isFollowing = followRepository.isFollowing(
-                followingUserId = currentUserId,
-                followedUserId = user.id
-            )
+        val followsByUser = followRepository.getFollowsByUser(currentUserId)
+        return users.map { user ->
+            val isFollowing = followsByUser.find { it.followedUserId == user.id } != null
             UserSearchResponse(
+                userId = user.id,
                 userName = user.username,
                 profilePictureUrl = user.profileImageUrl,
                 bio = user.bio,
                 isFollowing = isFollowing
             )
-        }
+        }.filter { it.userId != currentUserId }
     }
 
     fun isValidatePassword(enteredPassword: String, actualPassword: String): Boolean {
@@ -56,12 +75,20 @@ class UserService(
                 password = request.password,
                 profileImageUrl = "",
                 bio = "",
-                skill = listOf(),
+                skills = listOf(),
                 gitHubUrl = null,
                 instagramUrl = null,
                 linkedInUrl = null
             )
         )
+    }
+
+    suspend fun updateUser(
+        userId: String,
+        profileImageUrl: String,
+        updateProfileRequest: UpdateProfileRequest
+    ): Boolean {
+        return userRepository.updateUser(userId, profileImageUrl, updateProfileRequest)
     }
 
     suspend fun deleteUser(userId: String): Boolean {

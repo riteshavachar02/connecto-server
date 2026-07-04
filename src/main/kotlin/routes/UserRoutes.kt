@@ -2,24 +2,34 @@ package com.example.routes
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.example.data.models.Post
 import com.example.data.requests.CreateAccountRequest
 import com.example.data.requests.LoginRequest
+import com.example.data.requests.UpdateProfileRequest
 import com.example.data.response.AuthResponse
 import com.example.data.response.BasicApiResponse
+import com.example.service.PostService
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
 import com.example.util.ApiResponseMessage.FIELDS_BLANK
 import com.example.util.ApiResponseMessage.USER_ALREADY_EXISTS
+import com.example.util.Constants
+import com.example.util.Constants.BASE_URL
+import com.example.util.Constants.PROFILE_PICTURE_DIRECTORY
+import com.example.util.Constants.PROFILE_PICTURE_ROUTE
 import com.example.util.QueryParams
+import com.google.gson.Gson
 import io.ktor.http.*
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
+import io.ktor.http.content.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.Date
+import io.ktor.utils.io.*
+import kotlinx.io.readByteArray
+import org.koin.ktor.ext.inject
+import java.io.File
+import java.util.*
 
 fun Route.createUser(userService: UserService) {
 
@@ -174,8 +184,7 @@ fun Route.searchUsers(userService: UserService) {
             }
 
             val currentUserId = call.userId
-
-            val users = userService.searchUsers(
+            val searchResults = userService.searchUsers(
                 query = query,
                 page = page,
                 pageSize = pageSize,
@@ -184,9 +193,110 @@ fun Route.searchUsers(userService: UserService) {
 
             call.respond(
                 status = HttpStatusCode.OK,
-                message = users
+                message = searchResults
             )
+        }
+    }
+}
 
+fun Route.getUserProfile(userService: UserService) {
+    authenticate {
+        get("/api/user/profile") {
+            val userId = call.request.queryParameters[QueryParams.PARAM_USER_ID]
+
+            if (userId.isNullOrBlank()){
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponseMessage.INVALID_REQUEST
+                )
+                return@get
+            }
+            val profileResponse = userService.getUserProfile(userId, call.userId)
+            if (profileResponse == null){
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    ApiResponseMessage.USER_NOT_FOUND
+                )
+                return@get
+            }
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = profileResponse
+            )
+        }
+    }
+}
+
+fun Route.getPostsForProfile(
+    postService: PostService
+) {
+    authenticate {
+        get("/api/user/posts") {
+            val page = call.parameters[QueryParams.PARAM_PAGE]?.toIntOrNull() ?: 0
+            val pageSize = call.parameters[QueryParams.PARAM_PAGE_SIZE]?.toIntOrNull() ?: Constants.DEFAULT_POST_PAGE_SIZE
+
+            val posts = postService.getPostsForProfile(call.userId, page, pageSize)
+            call.respond(
+                HttpStatusCode.OK,
+                posts
+            )
+        }
+    }
+}
+
+fun Route.updateProfile(userService: UserService) {
+    val gson: Gson by inject()
+    authenticate {
+        put("/api/user/update") {
+            val multipart = call.receiveMultipart()
+            var updateProfileRequest: UpdateProfileRequest? = null
+            var fileName: String? = null
+            multipart.forEachPart { partData ->
+                when (partData) {
+                    is PartData.FormItem -> {
+                        updateProfileRequest = gson.fromJson(
+                            partData.value,
+                            UpdateProfileRequest::class.java
+                        )
+                    }
+                    is PartData.FileItem -> {
+                        val fileByte = partData.provider().readRemaining().readByteArray()
+                        val fileExtension = partData.originalFileName?.substringAfterLast('.', "")
+                        fileName = UUID.randomUUID().toString() + "." + fileExtension
+                        File("${PROFILE_PICTURE_DIRECTORY}/$fileName").writeBytes(fileByte)
+                    }
+                    is PartData.BinaryItem -> Unit
+                    is PartData.BinaryChannelItem -> Unit
+                }
+            }
+
+            val profilePictureUrl = "$BASE_URL${PROFILE_PICTURE_ROUTE}$fileName"
+            updateProfileRequest?.let { request ->
+                val updateAcknowledged = userService.updateUser(
+                    userId = call.userId,
+                    profileImageUrl = profilePictureUrl,
+                    updateProfileRequest = request
+                )
+                if (updateAcknowledged) {
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = BasicApiResponse(
+                            successful = true,
+                            message = ApiResponseMessage.USER_PROFILE_UPDATED
+                        )
+                    )
+                } else {
+                    File("${PROFILE_PICTURE_DIRECTORY}/$fileName").delete()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+
+            } ?: kotlin.run {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponseMessage.INVALID_REQUEST
+                )
+                return@put
+            }
 
         }
     }

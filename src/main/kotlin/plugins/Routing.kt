@@ -10,20 +10,29 @@ import com.example.routes.followUser
 import com.example.routes.getActivities
 import com.example.routes.getCommentsForPost
 import com.example.routes.getPostForFollows
+import com.example.routes.getPostsForProfile
+import com.example.routes.getUserProfile
 import com.example.routes.likeParent
 import com.example.routes.loginUser
 import com.example.routes.searchUsers
 import com.example.routes.unfollowUser
 import com.example.routes.unlikeParent
+import com.example.routes.updateProfile
 import com.example.service.ActivityService
 import com.example.service.CommentService
 import com.example.service.FollowService
 import com.example.service.LikeService
 import com.example.service.PostService
 import com.example.service.UserService
+import com.example.util.Constants
 import io.ktor.server.application.*
+import io.ktor.server.http.content.resource
+import io.ktor.server.http.content.static
+import io.ktor.server.http.content.staticFiles
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import java.io.File
 import kotlin.getValue
 
 fun Application.configureRouting() {
@@ -50,7 +59,10 @@ fun Application.configureRouting() {
             jwtSecret = jwtSecret
         )
         deleteUser(userService)
+        updateProfile(userService)
         searchUsers(userService)
+        getUserProfile(userService)
+        getPostsForProfile(postService)
 
         //Follow Routes
         followUser(followService, activityService)
@@ -72,5 +84,10 @@ fun Application.configureRouting() {
 
         //Activity Route
         getActivities(activityService)
+
+        staticFiles(
+            remotePath = "/profile_pictures",
+            dir = File(Constants.PROFILE_PICTURE_DIRECTORY)
+        )
     }
 }

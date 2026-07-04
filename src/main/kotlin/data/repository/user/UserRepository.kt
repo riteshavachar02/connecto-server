@@ -1,6 +1,7 @@
 package com.example.data.repository.user
 
 import com.example.data.models.User
+import com.example.data.requests.UpdateProfileRequest
 import com.example.util.Constants
 
 interface UserRepository {
@@ -10,6 +11,12 @@ interface UserRepository {
     suspend fun getUserById(id: String): User?
 
     suspend fun getUserByEmail(email: String): User?
+
+    suspend fun updateUser(
+        userId: String,
+        profileImageUrl: String,
+        updateProfileRequest: UpdateProfileRequest
+    ) : Boolean
 
     suspend fun dosePasswordForUserMatch(email: String, enteredPassword: String): Boolean
 
@@ -22,5 +29,7 @@ interface UserRepository {
         page: Int = 0,
         pageSize: Int = Constants.DEFAULT_USER_PAGE_SIZE,
     ): List<User>
+
+    suspend fun getUsers(userIds: List<String>): List<User>
 
 }

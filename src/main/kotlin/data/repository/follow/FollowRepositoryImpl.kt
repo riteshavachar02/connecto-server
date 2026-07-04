@@ -54,4 +54,8 @@ class FollowRepositoryImpl(
         )
         return deleteResult.deletedCount > 0
     }
+
+    override suspend fun getFollowsByUser(userId: String): List<Following> {
+        return following.find(Following::followingUserId eq userId).toList()
+    }
 }

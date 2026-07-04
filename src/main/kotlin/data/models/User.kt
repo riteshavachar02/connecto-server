@@ -8,11 +8,14 @@ data class User(
     val username: String,
     val password: String,
     val profileImageUrl: String,
-    val bio: String?,
-    val skill: List<String> = listOf(),
+    val bio: String,
     val gitHubUrl: String?,
     val instagramUrl: String?,
     val linkedInUrl: String?,
+    val followerCount: Int = 0,
+    val followingCount: Int = 0,
+    val postCount: Int = 0,
+    val skills: List<String> = listOf(),
     @BsonId
     val id: String = ObjectId().toString()
 )

@@ -1,8 +1,10 @@
 package com.example.data.repository.user
 
 import com.example.data.models.User
+import com.example.data.requests.UpdateProfileRequest
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.`in`
 import org.litote.kmongo.regex
 
 class UserRepositoryImpl(
@@ -45,11 +47,35 @@ class UserRepositoryImpl(
         page: Int,
         pageSize: Int
     ): List<User> {
-        return users.find(
-            User::username regex "(?i)$query"
-        )
+        return users.find(User::username regex "(?i)$query")
             .skip(page * pageSize)
             .limit(pageSize)
             .toList()
+    }
+
+    override suspend fun getUsers(userIds: List<String>): List<User> {
+        return users.find(User::id `in` userIds).toList()
+    }
+
+    override suspend fun updateUser(
+        userId: String,
+        profileImageUrl: String,
+        updateProfileRequest: UpdateProfileRequest
+    ): Boolean {
+        val user = getUserById(userId) ?: return false
+        return users.updateOneById(
+            id = userId,
+            update = User(
+                email = user.email,
+                username = updateProfileRequest.username,
+                password = user.password,
+                profileImageUrl = profileImageUrl,
+                bio = updateProfileRequest.bio,
+                gitHubUrl = updateProfileRequest.githubUrl,
+                instagramUrl = updateProfileRequest.instagramUrl,
+                linkedInUrl = updateProfileRequest.linkedInUrl,
+                skills = updateProfileRequest.skills
+            )
+        ).wasAcknowledged()
     }
 }
