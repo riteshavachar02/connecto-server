@@ -50,6 +50,7 @@ class UserRepositoryImpl(
         return users.find(User::username regex "(?i)$query")
             .skip(page * pageSize)
             .limit(pageSize)
+            .descendingSort(User::followerCount)
             .toList()
     }
 

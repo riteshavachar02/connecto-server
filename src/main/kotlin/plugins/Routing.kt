@@ -85,9 +85,14 @@ fun Application.configureRouting() {
         //Activity Route
         getActivities(activityService)
 
+
         staticFiles(
             remotePath = "/profile_pictures",
             dir = File(Constants.PROFILE_PICTURE_DIRECTORY)
+        )
+        staticFiles(
+            remotePath = "/posts",
+            dir = File(Constants.POSTS_DIRECTORY)
         )
     }
 }

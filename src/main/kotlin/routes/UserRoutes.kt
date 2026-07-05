@@ -17,6 +17,7 @@ import com.example.util.Constants.BASE_URL
 import com.example.util.Constants.PROFILE_PICTURE_DIRECTORY
 import com.example.util.Constants.PROFILE_PICTURE_ROUTE
 import com.example.util.QueryParams
+import com.example.util.save
 import com.google.gson.Gson
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -260,10 +261,7 @@ fun Route.updateProfile(userService: UserService) {
                         )
                     }
                     is PartData.FileItem -> {
-                        val fileByte = partData.provider().readRemaining().readByteArray()
-                        val fileExtension = partData.originalFileName?.substringAfterLast('.', "")
-                        fileName = UUID.randomUUID().toString() + "." + fileExtension
-                        File("${PROFILE_PICTURE_DIRECTORY}/$fileName").writeBytes(fileByte)
+                        fileName = partData.save(PROFILE_PICTURE_DIRECTORY)
                     }
                     is PartData.BinaryItem -> Unit
                     is PartData.BinaryChannelItem -> Unit
@@ -286,7 +284,7 @@ fun Route.updateProfile(userService: UserService) {
                         )
                     )
                 } else {
-                    File("${PROFILE_PICTURE_DIRECTORY}/$fileName").delete()
+                    File("${PROFILE_PICTURE_DIRECTORY}$fileName").delete()
                     call.respond(HttpStatusCode.InternalServerError)
                 }
 

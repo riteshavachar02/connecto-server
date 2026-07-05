@@ -8,42 +8,73 @@ import com.example.service.LikeService
 import com.example.service.PostService
 import com.example.util.ApiResponseMessage
 import com.example.util.Constants
+import com.example.util.Constants.BASE_URL
+import com.example.util.Constants.POSTS_DIRECTORY
+import com.example.util.Constants.POSTS_ROUTE
 import com.example.util.QueryParams
+import com.example.util.save
+import com.google.gson.Gson
 import io.ktor.http.*
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.koin.ktor.ext.inject
+import java.io.File
 
 fun Route.createPost(
     postService: PostService,
 ) {
+    val gson: Gson by inject()
     authenticate {
         post("/api/post/create") {
-            val request = call.receiveNullable<CreatePostRequest>() ?: kotlin.run {
-                call.respond(
-                    status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(successful = false, message = "Invalid Request")
-                )
-                return@post
+            val multipart = call.receiveMultipart()
+            var createPostRequest: CreatePostRequest? = null
+            var fileName: String? = null
+            multipart.forEachPart { partData ->
+                when (partData) {
+                    is PartData.FormItem -> {
+                        createPostRequest = gson.fromJson(
+                            partData.value,
+                            CreatePostRequest::class.java
+                        )
+                    }
+                    is PartData.FileItem -> {
+                        fileName = partData.save(POSTS_DIRECTORY)
+                    }
+                    is PartData.BinaryItem -> Unit
+                    is PartData.BinaryChannelItem -> Unit
+                }
             }
 
-            val didUserExist = postService.createPostIfUserExist(request, call.userId)
-            if (!didUserExist) {
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
-                        successful = false,
-                        message = ApiResponseMessage.USER_NOT_FOUND
-                    )
+            val postPictureUrl = "$BASE_URL${POSTS_ROUTE}$fileName"
+            createPostRequest?.let { request ->
+                val createPostAcknowledged = postService.createPost(
+                    request = request,
+                    userId = call.userId,
+                    imageUrl = postPictureUrl
                 )
-            } else {
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
-                        successful = true
+                if (createPostAcknowledged) {
+                    call.respond(
+                        status = HttpStatusCode.OK,
+                        message = BasicApiResponse(
+                            successful = true,
+                            message = ApiResponseMessage.POST_CREATED_SUCCESSFULLY
+                        )
                     )
+                } else {
+                    File("${POSTS_DIRECTORY}$fileName").delete()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+
+            } ?: kotlin.run {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ApiResponseMessage.INVALID_REQUEST
                 )
+                return@post
             }
         }
     }
