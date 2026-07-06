@@ -5,13 +5,16 @@ import com.example.data.response.BasicApiResponse
 import com.example.data.util.ParentType
 import com.example.service.ActivityService
 import com.example.service.LikeService
+import com.example.util.QueryParams
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import javax.management.Query
 
 fun Route.likeParent(
     likeService: LikeService,
@@ -67,7 +70,7 @@ fun Route.unlikeParent(
     activityService: ActivityService
 ) {
     authenticate {
-        delete("api/like") {
+        delete("api/unlike") {
             val request = call.receiveNullable<LikeUpdateRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
@@ -100,6 +103,27 @@ fun Route.unlikeParent(
                     )
                 )
             }
+        }
+    }
+}
+
+fun Route.getLikesForParent(likeService: LikeService) {
+    authenticate {
+        get ("api/like/parent") {
+            val parentId = call.parameters[QueryParams.PARAM_PARENT_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+
+            val usersWhoLikedParent = likeService.getUsersWhoLikedParent(
+                parentId,
+                call.userId
+            )
+
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = usersWhoLikedParent
+            )
         }
     }
 }

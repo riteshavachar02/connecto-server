@@ -9,6 +9,7 @@ import com.example.routes.deleteUser
 import com.example.routes.followUser
 import com.example.routes.getActivities
 import com.example.routes.getCommentsForPost
+import com.example.routes.getLikesForParent
 import com.example.routes.getPostForFollows
 import com.example.routes.getPostsForProfile
 import com.example.routes.getUserProfile
@@ -76,6 +77,7 @@ fun Application.configureRouting() {
         //Like Routes
         likeParent(likeService, activityService)
         unlikeParent(likeService, activityService)
+        getLikesForParent(likeService)
 
         // Comment Routes
         createComment(commentService, activityService)

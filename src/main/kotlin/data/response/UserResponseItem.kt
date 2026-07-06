@@ -1,6 +1,6 @@
 package com.example.data.response
 
-data class UserSearchResponse(
+data class UserResponseItem(
     val userId : String,
     val userName: String,
     val profilePictureUrl: String,

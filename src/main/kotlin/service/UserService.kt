@@ -6,7 +6,7 @@ import com.example.data.repository.user.UserRepository
 import com.example.data.requests.CreateAccountRequest
 import com.example.data.requests.UpdateProfileRequest
 import com.example.data.response.ProfileResponse
-import com.example.data.response.UserSearchResponse
+import com.example.data.response.UserResponseItem
 
 class UserService(
     private val userRepository: UserRepository,
@@ -45,12 +45,12 @@ class UserService(
         currentUserId: String,
         page: Int,
         pageSize: Int
-    ): List<UserSearchResponse> {
+    ): List<UserResponseItem> {
         val users = userRepository.searchUsers(query, page, pageSize)
         val followsByUser = followRepository.getFollowsByUser(currentUserId)
         return users.map { user ->
             val isFollowing = followsByUser.find { it.followedUserId == user.id } != null
-            UserSearchResponse(
+            UserResponseItem(
                 userId = user.id,
                 userName = user.username,
                 profilePictureUrl = user.profileImageUrl,
