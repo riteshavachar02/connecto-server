@@ -10,6 +10,7 @@ import com.example.data.response.BasicApiResponse
 import com.example.service.PostService
 import com.example.service.UserService
 import com.example.util.ApiResponseMessage
+import com.example.util.ApiResponseMessage.REGISTER_SUCCESSFUL
 import com.example.util.ApiResponseMessage.FIELDS_BLANK
 import com.example.util.ApiResponseMessage.USER_ALREADY_EXISTS
 import com.example.util.Constants
@@ -26,8 +27,6 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.utils.io.*
-import kotlinx.io.readByteArray
 import org.koin.ktor.ext.inject
 import java.io.File
 import java.util.*
@@ -45,7 +44,6 @@ fun Route.createUser(userService: UserService) {
         }
         if (userService.doseUserWithEmailExist(request.email)) {
             call.respond(
-                HttpStatusCode.Conflict,
                 BasicApiResponse(successful = false, message = USER_ALREADY_EXISTS)
             )
             return@post
@@ -54,7 +52,6 @@ fun Route.createUser(userService: UserService) {
         when(userService.validateCreateAccountRequest(request)) {
             is UserService.ValidationEvent.ErrorFieldEmpty -> {
                 call.respond(
-                    HttpStatusCode.BadRequest,
                     BasicApiResponse(successful = false, message = FIELDS_BLANK)
                 )
                 return@post
@@ -62,8 +59,7 @@ fun Route.createUser(userService: UserService) {
             is UserService.ValidationEvent.Success -> {
                 userService.createUser(request)
                 call.respond(
-                    HttpStatusCode.OK,
-                    BasicApiResponse(successful = true, message = "User created successfully")
+                    BasicApiResponse(successful = true, message = REGISTER_SUCCESSFUL)
                 )
             }
         }
