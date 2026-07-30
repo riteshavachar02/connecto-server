@@ -31,106 +31,6 @@ import org.koin.ktor.ext.inject
 import java.io.File
 import java.util.*
 
-fun Route.createUser(userService: UserService) {
-
-    post("/api/user/create") {
-
-        val request = call.receiveNullable<CreateAccountRequest>() ?: run {
-            call.respond(
-                status = HttpStatusCode.BadRequest,
-                message = ApiResponseMessage.INVALID_REQUEST
-            )
-            return@post
-        }
-        if (userService.doseUserWithEmailExist(request.email)) {
-            call.respond(
-                BasicApiResponse(successful = false, message = USER_ALREADY_EXISTS)
-            )
-            return@post
-        }
-
-        when(userService.validateCreateAccountRequest(request)) {
-            is UserService.ValidationEvent.ErrorFieldEmpty -> {
-                call.respond(
-                    BasicApiResponse(successful = false, message = FIELDS_BLANK)
-                )
-                return@post
-            }
-            is UserService.ValidationEvent.Success -> {
-                userService.createUser(request)
-                call.respond(
-                    BasicApiResponse(successful = true, message = REGISTER_SUCCESSFUL)
-                )
-            }
-        }
-    }
-}
-
-fun Route.loginUser(
-    userService: UserService,
-    jwtIssuer: String,
-    jwtAudience: String,
-    jwtSecret: String
-){
-    post("/api/user/login") {
-        val request = call.receiveNullable<LoginRequest>() ?: run {
-            call.respond(
-                status = HttpStatusCode.BadRequest,
-                message = ApiResponseMessage.INVALID_REQUEST
-            )
-            return@post
-        }
-
-        if (request.email.isBlank() || request.password.isBlank()) {
-            call.respond(
-                status = HttpStatusCode.BadRequest,
-                message = FIELDS_BLANK
-            )
-            return@post
-        }
-
-
-        val user = userService.getUserByEmail(request.email) ?: kotlin.run {
-            call.respond(
-                status = HttpStatusCode.Unauthorized,
-                message = BasicApiResponse(
-                    successful = false,
-                    message = ApiResponseMessage.INVALID_CREDENTIALS
-                )
-            )
-            return@post
-        }
-        val isCorrectPassword = userService.isValidatePassword(
-            enteredPassword = request.password,
-            actualPassword = user.password
-        )
-
-        if (isCorrectPassword) {
-            val expiresIn = 1000L * 60L * 60L * 24L * 365L
-            val token = JWT.create()
-                .withClaim("userId", user.id)
-                .withIssuer(jwtIssuer)
-                .withExpiresAt(Date(System.currentTimeMillis() + expiresIn))
-                .withAudience(jwtAudience)
-                .sign(Algorithm.HMAC256(jwtSecret))
-            call.respond(
-                status = HttpStatusCode.OK,
-                message = AuthResponse(
-                    token = token
-                )
-            )
-        } else {
-            call.respond(
-                status = HttpStatusCode.OK,
-                message = BasicApiResponse(
-                    successful = false,
-                    message = ApiResponseMessage.INVALID_CREDENTIALS
-                )
-            )
-        }
-    }
-}
-
 fun Route.deleteUser(userService: UserService){
 
     authenticate {
@@ -274,7 +174,7 @@ fun Route.updateProfile(userService: UserService) {
                 if (updateAcknowledged) {
                     call.respond(
                         status = HttpStatusCode.OK,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = true,
                             message = ApiResponseMessage.USER_PROFILE_UPDATED
                         )

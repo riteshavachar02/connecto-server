@@ -23,7 +23,7 @@ fun Route.createComment(
             val request = call.receiveNullable<CreateCommentRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = "Invalid Request"
                     )
@@ -36,7 +36,7 @@ fun Route.createComment(
                 is CommentService.ValidationEvent.ErrorCommentTooLong -> {
                     call.respond(
                         status = HttpStatusCode.OK,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = false,
                             message = ApiResponseMessage.FIELDS_BLANK
                         )
@@ -46,7 +46,7 @@ fun Route.createComment(
                 is CommentService.ValidationEvent.ErrorFieldsEmpty -> {
                     call.respond(
                         status = HttpStatusCode.OK,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = false,
                             message = ApiResponseMessage.COMMENT_TOO_LONG
                         )
@@ -56,7 +56,7 @@ fun Route.createComment(
                 is CommentService.ValidationEvent.PostNotFound -> {
                     call.respond(
                         status = HttpStatusCode.NotFound,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = false,
                             message = ApiResponseMessage.POST_NOT_FOUND
                         )
@@ -70,7 +70,7 @@ fun Route.createComment(
                     )
                     call.respond(
                         status = HttpStatusCode.OK,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = true,
                             message = ApiResponseMessage.COMMENT_CREATED_SUCCESSFULLY
                         )
@@ -89,7 +89,7 @@ fun Route.getCommentsForPost(
             val postId = call.parameters[QueryParams.PARAM_POST_ID] ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = "Invalid Request"
                     )
@@ -116,7 +116,7 @@ fun Route.deleteComment(
             val request = call.receiveNullable<DeleteCommentRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = "Invalid Request"
                     )
@@ -140,7 +140,7 @@ fun Route.deleteComment(
 
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true,
                         message = ApiResponseMessage.COMMENT_DELETED_SUCCESSFULLY
                     )
@@ -148,7 +148,7 @@ fun Route.deleteComment(
             } else {
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = ApiResponseMessage.USER_NOT_FOUND
                     )

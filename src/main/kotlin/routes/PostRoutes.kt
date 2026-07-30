@@ -59,7 +59,7 @@ fun Route.createPost(
                 if (createPostAcknowledged) {
                     call.respond(
                         status = HttpStatusCode.OK,
-                        message = BasicApiResponse(
+                        message = BasicApiResponse<Unit>(
                             successful = true,
                             message = ApiResponseMessage.POST_CREATED_SUCCESSFULLY
                         )
@@ -107,7 +107,7 @@ fun Route.deletePost(
             val request = call.receiveNullable<DeletePostRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(successful = false, message = "Invalid Request")
+                    message = BasicApiResponse<Unit>(successful = false, message = "Invalid Request")
                 )
                 return@delete
             }
@@ -123,7 +123,7 @@ fun Route.deletePost(
                 commentService.deleteCommentsFromPost(request.postId)
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true,
                         message = "Post deleted Successfully."
                     )

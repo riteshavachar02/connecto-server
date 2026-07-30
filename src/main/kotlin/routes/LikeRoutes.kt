@@ -25,7 +25,7 @@ fun Route.likeParent(
             val request = call.receiveNullable<LikeUpdateRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = "Invalid Request"
                     )
@@ -50,7 +50,7 @@ fun Route.likeParent(
                 )
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true,
                         message = message
                     )
@@ -74,7 +74,7 @@ fun Route.unlikeParent(
             val request = call.receiveNullable<LikeUpdateRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = "Invalid Request"
                     )
@@ -97,7 +97,7 @@ fun Route.unlikeParent(
                 )
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true,
                         message = message
                     )

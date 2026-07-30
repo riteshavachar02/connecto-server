@@ -22,7 +22,7 @@ fun Route.followUser(
             val request = call.receiveNullable<FollowUpdateRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(successful = false, message = "Invalid Request")
+                    message = BasicApiResponse<Unit>(successful = false, message = "Invalid Request")
                 )
                 return@post
             }
@@ -34,14 +34,14 @@ fun Route.followUser(
                 )
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true
                     )
                 )
             } else {
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = USER_NOT_FOUND
                     )
@@ -61,7 +61,7 @@ fun Route.unfollowUser(
             val request = call.receiveNullable<FollowUpdateRequest>() ?: kotlin.run {
                 call.respond(
                     status = HttpStatusCode.BadRequest,
-                    message = BasicApiResponse(successful = false, message = "Invalid Request")
+                    message = BasicApiResponse<Unit>(successful = false, message = "Invalid Request")
                 )
                 return@delete
             }
@@ -74,14 +74,14 @@ fun Route.unfollowUser(
 
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = true
                     )
                 )
             } else {
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = BasicApiResponse(
+                    message = BasicApiResponse<Unit>(
                         successful = false,
                         message = USER_NOT_FOUND
                     )

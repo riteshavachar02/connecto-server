@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.routes.authenticate
 import com.example.routes.createComment
 import com.example.routes.createPost
 import com.example.routes.createUser
@@ -52,6 +53,7 @@ fun Application.configureRouting() {
     routing {
 
         // User Routes
+        authenticate()
         createUser(userService)
         loginUser(
             userService = userService,
